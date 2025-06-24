@@ -4,11 +4,12 @@ using Raylib_cs;
 
 const double TRIAL_TIME = 0.25;
 const int WIN_SIZE = 400;
+const int TARGET_FPS = 60; 
 
 const string SOUND_FILE = "sine.wav";
 
 BCI2000Connection conn = new();
-conn.Synchronized = true;
+conn.Synchronized = false;
 
 conn.Connect("127.0.0.1", 3999);
 
@@ -19,18 +20,28 @@ BCI2000Remote bci = new(conn);
 bci.AddEvent("Ev", 1, 0);
 bci.AddEvent("IntertrialSync", 1, 0);
 
+/**
 bci.StartupModules( new Dictionary<string, IEnumerable<string>?>{
         {"Blackrock", null },
         {"DummySignalProcessing", null},
         {"DummyApplication", null}
         });
-
 bci.SetParameter("SamplingRate", "30000");
+        */
+
+bci.StartupModules( new Dictionary<string, IEnumerable<string>?>{
+        {"SignalGenerator", null },
+        {"DummySignalProcessing", null},
+        {"DummyApplication", null}
+        });
 
 bci.Visualize("Ev");
-bci.Visualize("TimestampDifference");
+//bci.Visualize("TimestampDifference");
 
+Raylib.SetTargetFPS(TARGET_FPS);
 Raylib.InitWindow(WIN_SIZE, WIN_SIZE, "BCI2000RemoteNET latency test");
+Raylib.InitAudioDevice();
+Raylib.ToggleFullscreen();
 
 Sound sin = Raylib.LoadSound(SOUND_FILE);
 
@@ -79,13 +90,15 @@ while (!Raylib.WindowShouldClose()) {
       {
         rectColor = Color.White;
         Raylib.PlaySound(sin);
-        bci.SetEventTimestamped("Ev", 1, execute_unchecked: true);
+        //bci.SetEventTimestamped("Ev", 1, execute_unchecked: true);
+        bci.SetEventUnchecked("Ev", 1);
       }
       else
       {
         rectColor = Color.Black;
         Raylib.StopSound(sin);
-        bci.SetEventTimestamped("Ev", 0, execute_unchecked: true);
+        //bci.SetEventTimestamped("Ev", 0, execute_unchecked: true);
+        bci.SetEventUnchecked("Ev", 0);
       }
     }
   }
