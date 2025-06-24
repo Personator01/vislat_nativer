@@ -5,6 +5,8 @@ using Raylib_cs;
 const double TRIAL_TIME = 0.25;
 const int WIN_SIZE = 400;
 
+const string SOUND_FILE = "sine.wav";
+
 BCI2000Connection conn = new();
 conn.Synchronized = true;
 
@@ -29,6 +31,8 @@ bci.Visualize("Ev");
 bci.Visualize("TimestampDifference");
 
 Raylib.InitWindow(WIN_SIZE, WIN_SIZE, "BCI2000RemoteNET latency test");
+
+Sound sin = Raylib.LoadSound(SOUND_FILE);
 
 
 while (bci.GetSystemState() != BCI2000Remote.SystemState.Running) {
@@ -74,11 +78,13 @@ while (!Raylib.WindowShouldClose()) {
       if (rectColor.Equals(Color.Black))
       {
         rectColor = Color.White;
+        Raylib.PlaySound(sin);
         bci.SetEventTimestamped("Ev", 1, execute_unchecked: true);
       }
       else
       {
         rectColor = Color.Black;
+        Raylib.StopSound(sin);
         bci.SetEventTimestamped("Ev", 0, execute_unchecked: true);
       }
     }
